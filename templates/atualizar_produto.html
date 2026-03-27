@@ -1,0 +1,22 @@
+@app.route('/admin/atualizar_produto', methods=['POST'])
+def atualizar_produto():
+    if not session.get('admin_logado'):
+        return redirect(url_for('login'))
+
+    # Pegando os dados vindos do formulário do admin.html
+    id_p = int(request.form.get('id'))
+    nova_desc = request.form.get('descricao')
+    novo_preco = float(request.form.get('preco'))
+    cat = request.form.get('categoria')
+
+    # Identifica qual lista atualizar
+    lista = hamburgueres if cat == 'hamburguer' else bebidas
+
+    # Procura o produto pelo ID e altera os valores na memória
+    for item in lista:
+        if item['id'] == id_p:
+            item['descricao'] = nova_desc
+            item['preco'] = novo_preco
+            break
+
+    return redirect(url_for('admin_painel'))

@@ -1,0 +1,137 @@
+/* Reset e estilos base */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #fff8f0;
+    padding: 20px;
+    color: #333;
+}
+
+/* Cabeçalho */
+h1, h2 {
+    text-align: center;
+    color: #ff4500;
+    margin-bottom: 20px;
+}
+
+/* Botão do carrinho fixo */
+.botao-carrinho {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #ff4500;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+    z-index: 100;
+}
+
+.botao-carrinho:hover {
+    transform: scale(1.05);
+}
+
+/* Container de cards */
+.cardapio-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+/* Card de item */
+.item-card {
+    background-color: #fff;
+    border-radius: 15px;
+    padding: 15px;
+    width: 220px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.item-card:hover {
+    transform: translateY(-5px);
+}
+
+.item-card img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 15px;
+    margin-bottom: 10px;
+}
+
+/* Botão adicionar ao carrinho */
+.botao-adicionar {
+    background-color: #ff4500;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    margin-top: 5px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s;
+}
+
+.botao-adicionar:hover {
+    transform: scale(1.05);
+}
+
+/* Textarea observação */
+.item-card textarea {
+    width: 100%;
+    border-radius: 8px;
+    padding: 5px;
+    margin-top: 5px;
+    resize: none;
+    font-family: Arial, sans-serif;
+}
+
+/* Media Queries para responsividade */
+
+/* Tablets */
+@media (max-width: 1024px) {
+    .item-card {
+        width: 45%;
+    }
+}
+
+/* Celulares */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    .cardapio-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .item-card {
+        width: 90%;
+    }
+
+    .botao-carrinho {
+        padding: 10px 16px;
+        top: 10px;
+        right: 10px;
+    }
+
+    .item-card img {
+        width: 120px;
+        height: 120px;
+    }
+}

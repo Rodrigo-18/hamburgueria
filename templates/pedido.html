@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Seu Carrinho</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>🛒 Seu Carrinho</h1>
+
+    <div class="carrinho-container">
+        {% if carrinho %}
+            {% for item in carrinho %}
+            <div class="item-carrinho" style="border-bottom: 1px solid #ccc; padding: 10px;">
+                <h3>{{ item.nome }}</h3>
+                <p>Preço: R$ {{ item.preco }}</p>
+                <p><strong>Obs:</strong> {{ item.observacao if item.observacao else "Sem observação" }}</p>
+            </div>
+            {% endfor %}
+
+           {% if carrinho %}
+    <div style="background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-top: 20px;">
+        <h3>Finalizar Pedido</h3>
+        <form action="{{ url_for('confirmar_pedido') }}" method="POST">
+            <div style="margin-bottom: 15px;">
+                <label>Seu Nome:</label><br>
+                <input type="text" name="cliente_nome" required style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label>Número da Mesa:</label><br>
+                <input type="number" name="mesa" required style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+            </div>
+
+            <button type="submit" style="background-color: #5cb85c; color: white; border: none; padding: 12px 20px; border-radius: 25px; cursor: pointer; font-weight: bold; width: 100%;">
+                Confirmar e Enviar Pedido ✅
+            </button>
+        </form>
+
+        <a href="{{ url_for('limpar_carrinho') }}" style="display: block; text-align: center; margin-top: 15px; color: #d9534f; text-decoration: none; font-size: 14px;">
+            🗑️ Limpar Carrinho
+        </a>
+    </div>
+
+{% else %}
+    <p style="text-align: center;">Seu carrinho está vazio! 😢</p>
+    <a href="{{ url_for('index') }}">Voltar ao Cardápio</a>
+{% endif %}
+
+        {% endif %}
+        <p style="text-align: center;">              </p>
+    <a href="{{ url_for('index') }}">Voltar ao Cardápio</a>
+
+<hr>
+
+{% if carrinho %}
+
+        </button>
+    </a>
+<br>
+
+
+
+
+{% endif %}
+
+    </div>
+</body>
+</html>

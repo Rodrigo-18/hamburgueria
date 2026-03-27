@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mini iFood</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <a href="{{ url_for('login') }}" class="link-admin-topo">
+        Acesso Restrito (Administração)
+    </a>
+
+    <h1>🍔 Restaurante</h1>
+
+
+    </a>
+</footer>
+
+<h2>Hambúrgueres</h2>
+<div class="cardapio-container">
+    {% for item in hamburgueres %}
+    <div class="item-card">
+        {% if item.imagem_url %}
+        <img src="{{ item.imagem_url }}" alt="{{ item.nome }}">
+        {% endif %}
+        <h3>{{ item.nome }}</h3>
+        <p>{{ item.descricao }}</p>
+        <p>R$ {{ "%.2f"|format(item.preco|float) }}</p>
+
+        <!-- Formulário para adicionar ao carrinho -->
+        <form action="{{ url_for('adicionar_carrinho') }}" method="POST">
+            <input type="hidden" name="nome" value="{{ item.nome }}">
+            <input type="hidden" name="preco" value="{{ item.preco }}">
+            <textarea name="observacao" placeholder="Observação (opcional)"></textarea><br>
+            <button type="submit" class="botao-adicionar">Adicionar ao Carrinho</button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+
+<h2>Bebidas</h2>
+<div class="cardapio-container">
+    {% for item in bebidas %}
+    <div class="item-card">
+        {% if item.imagem_url %}
+        <img src="{{ item.imagem_url }}" alt="{{ item.nome }}">
+        {% endif %}
+        <h3>{{ item.nome }}</h3>
+        <p>{{ item.descricao }}</p>
+        <p>R$ {{ "%.2f"|format(item.preco|float) }}</p>
+
+        <!-- Formulário para adicionar ao carrinho -->
+        <form action="{{ url_for('adicionar_carrinho') }}" method="POST">
+            <input type="hidden" name="nome" value="{{ item.nome }}">
+            <input type="hidden" name="preco" value="{{ item.preco }}">
+            <textarea name="observacao" placeholder="Observação (opcional)"></textarea><br>
+            <button type="submit" class="botao-adicionar">Adicionar ao Carrinho</button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+
+<a href="{{ url_for('mostrar_carrinho') }}">
+    <button class="botao-carrinho"> 🛒 Carrinho ({{ carrinho|length if carrinho else 0 }})
+    </button>
+</a>
+
+</body>
+</html>

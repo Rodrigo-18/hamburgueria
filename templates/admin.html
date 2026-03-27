@@ -1,0 +1,86 @@
+<body style="font-family: Arial; padding: 20px; background-color: #f4f4f9;">
+    <h1>📋 Pedidos Recebidos</h1>
+    <a href="{{ url_for('index') }}">Voltar ao Cardápio</a> |
+    <a href="{{ url_for('limpar_pedidos_admin') }}">Limpar Lista de Pedidos</a>
+    <hr>
+
+    {% for p in pedidos %}
+    <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 10px; background: white;">
+        <p><strong>Mesa: {{ p.mesa }}</strong> | Cliente: {{ p.cliente }}</p>
+        <p><small>Horário: {{ p.horario }}</small></p>
+        <ul>
+            {% for item in p.itens %}
+                <li>{{ item.nome }} {% if item.observacao %}- <i>{{ item.observacao }}</i>{% endif %}</li>
+            {% endfor %}
+        </ul>
+        <p><strong>Total: R$ {{ "%.2f"|format(p.total) }}</strong></p>
+    </div>
+    {% else %}
+        <p>Nenhum pedido recebido ainda. 🍔</p>
+    {% endfor %}
+
+    <hr style="margin-top: 40px;">
+
+    <h2>🛠️ Gerenciar Cardápio (Editar Preços e Descrições)</h2>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+
+        <div style="flex: 1; min-width: 300px; background: #fff; padding: 15px; border-radius: 10px; border: 1px solid #ddd;">
+            <h3>Hambúrgueres</h3>
+            {% for item in hamburgueres %}
+            <form action="{{ url_for('atualizar_produto') }}" method="POST" style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+                <input type="hidden" name="id" value="{{ item.id }}">
+                <input type="hidden" name="categoria" value="hamburguer">
+
+                <p><strong>{{ item.nome }}</strong></p>
+                <label>Descrição:</label><br>
+                <input type="text" name="descricao" value="{{ item.descricao }}" style="width: 90%; margin-bottom: 5px;" onfocus="pausarRefresh()" onblur="retomarRefresh()"><br>
+
+                <label>Preço R$:</label>
+                <input type="number" name="preco" value="{{ item.preco }}" step="0.01" style="width: 70px;" onfocus="pausarRefresh()" onblur="retomarRefresh()">
+
+                <button type="submit" style="background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Salvar</button>
+            </form>
+            {% endfor %}
+        </div>
+
+        <div style="flex: 1; min-width: 300px; background: #fff; padding: 15px; border-radius: 10px; border: 1px solid #ddd;">
+            <h3>Bebidas</h3>
+            {% for item in bebidas %}
+            <form action="{{ url_for('atualizar_produto') }}" method="POST" style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+                <input type="hidden" name="id" value="{{ item.id }}">
+                <input type="hidden" name="categoria" value="bebida">
+
+                <p><strong>{{ item.nome }}</strong></p>
+                <label>Descrição:</label><br>
+                <input type="text" name="descricao" value="{{ item.descricao }}" style="width: 90%; margin-bottom: 5px;" onfocus="pausarRefresh()" onblur="retomarRefresh()"><br>
+
+                <label>Preço R$:</label>
+                <input type="number" name="preco" value="{{ item.preco }}" step="0.01" style="width: 70px;" onfocus="pausarRefresh()" onblur="retomarRefresh()">
+
+                <button type="submit" style="background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Salvar</button>
+            </form>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        let refreshAtivo = true;
+
+        // Função para pausar o refresh quando o admin clica no campo de texto
+        function pausarRefresh() {
+            refreshAtivo = false;
+            console.log("Refresh pausado para edição...");
+        }
+
+        // Função para retomar o refresh quando o admin sai do campo
+        function retomarRefresh() {
+            refreshAtivo = true;
+        }
+
+        setInterval(function(){
+            if (refreshAtivo) {
+                location.reload();
+            }
+        }, 5000);
+    </script>
+</body>
