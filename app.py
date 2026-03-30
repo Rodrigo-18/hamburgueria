@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from datetime import datetime
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = 'chave_secreta_para_o_ifood'
@@ -7,29 +9,33 @@ app.secret_key = 'chave_secreta_para_o_ifood'
 # --- BANCO DE DADOS TEMPORÁRIO ---
 pedidos_geral = []
 
+# 🔥 IMAGENS DIRETO NA RAIZ DO STATIC
 hamburgueres = [
-    {"id": 1, "nome": "X-Burger", "preco": 15.0, "descricao": "Pão, carne e queijo"},
-    {"id": 2, "nome": "X-Salada", "preco": 18.0, "descricao": "Alface, tomate e queijo"},
-    {"id": 3, "nome": "X-Bacon", "preco": 20.0, "descricao": "Com bacon crocante"},
-    {"id": 4, "nome": "X-Tudo", "preco": 25.0, "descricao": "Completo com tudo"},
-    {"id": 5, "nome": "X-Frango", "preco": 17.0, "descricao": "Frango grelhado"},
-    {"id": 6, "nome": "X-Egg", "preco": 19.0, "descricao": "Com ovo"},
-    {"id": 7, "nome": "X-Calabresa", "preco": 22.0, "descricao": "Com calabresa"}
+    {"id": 1, "nome": "X-Burger", "preco": 15.0, "descricao": "Pão, carne e queijo",
+     "imagem_url": "xburger.jpg"},
+    {"id": 2, "nome": "X-Salada", "preco": 18.0, "descricao": "Alface, tomate e queijo",
+     "imagem_url": "xsalada.jpg"},
+    {"id": 3, "nome": "X-Bacon", "preco": 20.0, "descricao": "Com bacon crocante",
+     "imagem_url": "xbacon.jpg"},
+    {"id": 4, "nome": "X-Tudo", "preco": 25.0, "descricao": "Completo com tudo",
+     "imagem_url": "xtudo.jpg"},
 ]
 
 bebidas = [
-    {"id": 1, "nome": "Refrigerante", "preco": 8.0, "descricao": "Lata 350ml"},
-    {"id": 2, "nome": "Suco Natural", "preco": 10.0, "descricao": "Diversos sabores"},
-    {"id": 3, "nome": "Água", "preco": 5.0, "descricao": "Sem gás"},
-    {"id": 4, "nome": "Água com gás", "preco": 6.0, "descricao": "Gelada"},
-    {"id": 5, "nome": "Milkshake", "preco": 12.0, "descricao": "Chocolate, morango ou baunilha"}
+    {"id": 1, "nome": "Refrigerante", "preco": 8.0, "descricao": "Lata 350ml",
+     "imagem_url": "refri.jpg"},
+    {"id": 2, "nome": "Suco Natural", "preco": 10.0, "descricao": "Diversos sabores",
+     "imagem_url": "suco.jpg"},
 ]
 
 
 @app.route('/')
 def index():
     itens_carrinho = session.get('carrinho', [])
-    return render_template('index.html', hamburgueres=hamburgueres, bebidas=bebidas, carrinho=itens_carrinho)
+    return render_template('index.html',
+                           hamburgueres=hamburgueres,
+                           bebidas=bebidas,
+                           carrinho=itens_carrinho)
 
 
 @app.route('/adicionar', methods=['POST'])
@@ -47,6 +53,7 @@ def adicionar_carrinho():
     lista.append(item)
     session['carrinho'] = lista
     session.modified = True
+
     return redirect(url_for('index'))
 
 
@@ -85,10 +92,13 @@ def confirmar_pedido():
         pedidos_geral.append(novo_pedido)
         session.pop('carrinho', None)
 
-    return render_template('pedido_confirmado.html', nome=nome, mesa=mesa, horario=horario_agora)
+    return render_template('pedido_confirmado.html',
+                           nome=nome,
+                           mesa=mesa,
+                           horario=horario_agora)
 
 
-# --- ÁREA ADMINISTRATIVA ---
+# --- LOGIN ADMIN ---
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -110,7 +120,6 @@ def admin_painel():
     if not session.get('admin_logado'):
         return redirect(url_for('login'))
 
-    # CORREÇÃO: Passando as listas para o template aparecer os produtos!
     return render_template('admin.html',
                            pedidos=pedidos_geral,
                            hamburgueres=hamburgueres,
@@ -128,7 +137,6 @@ def atualizar_produto():
     if not session.get('admin_logado'):
         return redirect(url_for('login'))
 
-    # CORREÇÃO: Removido o render_template daqui (esta rota apenas processa dados)
     id_p = int(request.form.get('id'))
     nova_desc = request.form.get('descricao')
     novo_preco = float(request.form.get('preco'))
@@ -144,6 +152,50 @@ def atualizar_produto():
 
     return redirect(url_for('admin_painel'))
 
+
+# 🔥 UPLOAD AJUSTADO PARA /static DIRETO
+@app.route('/adicionar_produto', methods=['POST'])
+def adicionar_produto():
+    nome = request.form.get('nome')
+    descricao = request.form.get('descricao')
+    preco = request.form.get('preco')
+    imagem = request.files['imagem']
+
+    nome_arquivo = secure_filename(imagem.filename)
+
+    caminho = os.path.join('static', nome_arquivo)
+    imagem.save(caminho)
+
+    novo_produto = {
+        "id": len(hamburgueres) + 1,
+        "nome": nome,
+        "descricao": descricao,
+        "preco": float(preco),
+        "imagem_url": nome_arquivo  # 🔥 AGORA CORRETO
+    }
+
+    hamburgueres.append(novo_produto)
+
+    return redirect(url_for('admin_painel'))
+@app.route('/excluir_produto', methods=['POST'])
+def excluir_produto():
+    if not session.get('admin_logado'):
+        return redirect(url_for('login'))
+
+    id_p = int(request.form.get('id'))
+    cat = request.form.get('categoria')
+
+    lista = hamburgueres if cat == 'hamburguer' else bebidas
+
+    for item in lista:
+        if item['id'] == id_p:
+            lista.remove(item)
+            break
+
+    return redirect(url_for('admin_painel'))
+@app.route('/pedidos_json')
+def pedidos_json():
+    return {"pedidos": pedidos_geral}
 
 
 if __name__ == '__main__':
