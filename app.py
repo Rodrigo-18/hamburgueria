@@ -12,7 +12,7 @@ pedidos_geral = []
 # 🔥 IMAGENS DIRETO NA RAIZ DO STATIC
 hamburgueres = [
     {"id": 1, "nome": "X-Burger", "preco": 15.0, "descricao": "Pão, carne e queijo",
-     "imagem_url": "xburger.jpg"},
+     "imagem_url": "imagens.jpg"},
     {"id": 2, "nome": "X-Salada", "preco": 18.0, "descricao": "Alface, tomate e queijo",
      "imagem_url": "xsalada.jpg"},
     {"id": 3, "nome": "X-Bacon", "preco": 20.0, "descricao": "Com bacon crocante",
