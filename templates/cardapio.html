@@ -132,10 +132,11 @@
     {% for item in hamburgueres %}
     <div class="item-card">
         {% if item.imagem_url %}
-        <img src="{{ item.imagem_url }}" alt="{{ item.nome }}">
-        {% else %}
-        <img src="{{ url_for('static', filename='default_burger.png') }}" alt="{{ item.nome }}">
-        {% endif %}
+        {% if item.imagem_url %}
+<img src="{{ url_for('static', filename=item.imagem_url) }}" alt="{{ item.nome }}">
+{% else %}
+<img src="{{ url_for('static', filename='default_burger.png') }}" alt="{{ item.nome }}">
+{% endif %}
         <h3>{{ item.nome }}</h3>
         <p>{{ item.descricao }}</p>
         <p>R$ {{ item.preco }}</p>
