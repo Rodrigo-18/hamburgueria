@@ -20,7 +20,7 @@
     {% for item in hamburgueres %}
     <div class="item-card">
         {% if item.imagem_url %}
-        <img src="{{ item.imagem_url }}" alt="{{ item.nome }}">
+        <img src="{{ url_for('static', filename=item.imagem_url) }}">
         {% endif %}
         <h3>{{ item.nome }}</h3>
         <p>{{ item.descricao }}</p>
