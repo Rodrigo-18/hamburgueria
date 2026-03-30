@@ -75,27 +75,37 @@ def confirmar_pedido():
     mesa = request.form.get('mesa')
     itens = session.get('carrinho', [])
 
+    # 🔥 BLOQUEIA DUPLICAÇÃO
+    if not itens:
+        return redirect(url_for('index'))
+
     horario_agora = datetime.now().strftime('%d/%m/%Y %H:%M')
 
-    if itens:
-        total_pedido = sum(float(item['preco']) for item in itens)
+    total_pedido = sum(float(item['preco']) for item in itens)
 
-        novo_pedido = {
-            "cliente": nome,
-            "mesa": mesa,
-            "itens": itens,
-            "total": total_pedido,
-            "horario": horario_agora,
-            "status": "Pendente"
-        }
+    novo_pedido = {
+        "cliente": nome,
+        "mesa": mesa,
+        "itens": itens,
+        "total": total_pedido,
+        "horario": horario_agora,
+        "status": "Pendente"
+    }
 
-        pedidos_geral.append(novo_pedido)
-        session.pop('carrinho', None)
+    pedidos_geral.append(novo_pedido)
 
-    return render_template('pedido_confirmado.html',
-                           nome=nome,
-                           mesa=mesa,
-                           horario=horario_agora)
+    # 🔥 LIMPA CARRINHO
+    session.pop('carrinho', None)
+
+    # 🔥 SALVA CONFIRMAÇÃO
+    session['ultimo_pedido'] = {
+        "nome": nome,
+        "mesa": mesa,
+        "horario": horario_agora
+    }
+
+    # 🔥 REDIRECT (anti-duplicação)
+    return redirect(url_for('pedido_confirmado'))
 
 
 # --- LOGIN ADMIN ---
@@ -196,6 +206,17 @@ def excluir_produto():
 @app.route('/pedidos_json')
 def pedidos_json():
     return {"pedidos": pedidos_geral}
+
+@app.route('/pedido_confirmado')
+def pedido_confirmado():
+    pedido = session.get('ultimo_pedido', {})
+
+    return render_template(
+        'pedido_confirmado.html',
+        nome=pedido.get('nome'),
+        mesa=pedido.get('mesa'),
+        horario=pedido.get('horario')
+    )
 
 
 if __name__ == '__main__':
