@@ -1,86 +1,182 @@
-<body style="font-family: Arial; padding: 20px; background-color: #f4f4f9;">
-    <h1>📋 Pedidos Recebidos</h1>
-    <a href="{{ url_for('index') }}">Voltar ao Cardápio</a> |
-    <a href="{{ url_for('limpar_pedidos_admin') }}">Limpar Lista de Pedidos</a>
-    <hr>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Painel Admin</title>
 
-    {% for p in pedidos %}
-    <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 10px; background: white;">
-        <p><strong>Mesa: {{ p.mesa }}</strong> | Cliente: {{ p.cliente }}</p>
-        <p><small>Horário: {{ p.horario }}</small></p>
-        <ul>
-            {% for item in p.itens %}
-                <li>{{ item.nome }} {% if item.observacao %}- <i>{{ item.observacao }}</i>{% endif %}</li>
-            {% endfor %}
-        </ul>
-        <p><strong>Total: R$ {{ "%.2f"|format(p.total) }}</strong></p>
-    </div>
+<!-- 🔥 AUTO ATUALIZA -->
+<meta http-equiv="refresh" content="5">
+
+<style>
+body {
+    font-family: Arial;
+    background: #f5f5f5;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: #ff4500;
+}
+
+.container {
+    display: flex;
+    gap: 20px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.item {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+}
+
+input {
+    padding: 5px;
+    margin: 5px 0;
+    width: 90%;
+}
+
+button {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.salvar {
+    background: #28a745;
+    color: white;
+}
+
+.excluir {
+    background: #dc3545;
+    color: white;
+    margin-left: 5px;
+}
+
+.topo {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.topo a {
+    text-decoration: none;
+    background: #ff4500;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+}
+</style>
+
+</head>
+<body>
+
+<h1>🍔 Painel Administrativo</h1>
+
+<div class="topo">
+    <a href="{{ url_for('index') }}">Ver Cardápio</a>
+    <a href="{{ url_for('limpar_pedidos_admin') }}">Limpar Pedidos</a>
+</div>
+
+<!-- 🔥 PEDIDOS AGORA NO TOPO -->
+<div class="card">
+    <h2>📋 Pedidos</h2>
+
+    {% if pedidos %}
+        {% for pedido in pedidos %}
+        <div class="item">
+            <strong>Cliente:</strong> {{ pedido.cliente }}<br>
+            <strong>Mesa:</strong> {{ pedido.mesa }}<br>
+            <strong>Horário:</strong> {{ pedido.horario }}<br>
+            <strong>Status:</strong> {{ pedido.status }}<br>
+
+            <strong>Itens:</strong>
+            <ul>
+                {% for item in pedido.itens %}
+                <li>{{ item.nome }} - R$ {{ item.preco }}</li>
+                {% endfor %}
+            </ul>
+
+            <strong>Total:</strong> R$ {{ pedido.total }}
+        </div>
+        {% endfor %}
     {% else %}
-        <p>Nenhum pedido recebido ainda. 🍔</p>
-    {% endfor %}
+        <p>Nenhum pedido ainda</p>
+    {% endif %}
+</div>
 
-    <hr style="margin-top: 40px;">
+<!-- PRODUTOS -->
+<div class="container">
 
-    <h2>🛠️ Gerenciar Cardápio (Editar Preços e Descrições)</h2>
-    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+<!-- HAMBURGUERES -->
+<div class="card">
+    <h2>Hambúrgueres</h2>
 
-        <div style="flex: 1; min-width: 300px; background: #fff; padding: 15px; border-radius: 10px; border: 1px solid #ddd;">
-            <h3>Hambúrgueres</h3>
-            {% for item in hamburgueres %}
-            <form action="{{ url_for('atualizar_produto') }}" method="POST" style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
-                <input type="hidden" name="id" value="{{ item.id }}">
-                <input type="hidden" name="categoria" value="hamburguer">
+    {% for item in hamburgueres %}
+    <div class="item">
 
-                <p><strong>{{ item.nome }}</strong></p>
-                <label>Descrição:</label><br>
-                <input type="text" name="descricao" value="{{ item.descricao }}" style="width: 90%; margin-bottom: 5px;" onfocus="pausarRefresh()" onblur="retomarRefresh()"><br>
+        <strong>{{ item.nome }}</strong><br>
 
-                <label>Preço R$:</label>
-                <input type="number" name="preco" value="{{ item.preco }}" step="0.01" style="width: 70px;" onfocus="pausarRefresh()" onblur="retomarRefresh()">
+        <img src="{{ url_for('static', filename=item.imagem_url) }}" width="80"><br>
 
-                <button type="submit" style="background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Salvar</button>
-            </form>
-            {% endfor %}
-        </div>
+        <form action="{{ url_for('atualizar_produto') }}" method="POST">
+            <input type="hidden" name="id" value="{{ item.id }}">
+            <input type="hidden" name="categoria" value="hamburguer">
 
-        <div style="flex: 1; min-width: 300px; background: #fff; padding: 15px; border-radius: 10px; border: 1px solid #ddd;">
-            <h3>Bebidas</h3>
-            {% for item in bebidas %}
-            <form action="{{ url_for('atualizar_produto') }}" method="POST" style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
-                <input type="hidden" name="id" value="{{ item.id }}">
-                <input type="hidden" name="categoria" value="bebida">
+            Descrição:<br>
+            <input type="text" name="descricao" value="{{ item.descricao }}"><br>
 
-                <p><strong>{{ item.nome }}</strong></p>
-                <label>Descrição:</label><br>
-                <input type="text" name="descricao" value="{{ item.descricao }}" style="width: 90%; margin-bottom: 5px;" onfocus="pausarRefresh()" onblur="retomarRefresh()"><br>
+            Preço:<br>
+            <input type="number" step="0.01" name="preco" value="{{ item.preco }}"><br>
 
-                <label>Preço R$:</label>
-                <input type="number" name="preco" value="{{ item.preco }}" step="0.01" style="width: 70px;" onfocus="pausarRefresh()" onblur="retomarRefresh()">
+            <button class="salvar">Salvar</button>
+        </form>
 
-                <button type="submit" style="background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Salvar</button>
-            </form>
-            {% endfor %}
-        </div>
+
     </div>
+    {% endfor %}
+</div>
 
-    <script>
-        let refreshAtivo = true;
+<!-- BEBIDAS -->
+<div class="card">
+    <h2>Bebidas</h2>
 
-        // Função para pausar o refresh quando o admin clica no campo de texto
-        function pausarRefresh() {
-            refreshAtivo = false;
-            console.log("Refresh pausado para edição...");
-        }
+    {% for item in bebidas %}
+    <div class="item">
 
-        // Função para retomar o refresh quando o admin sai do campo
-        function retomarRefresh() {
-            refreshAtivo = true;
-        }
+        <strong>{{ item.nome }}</strong><br>
 
-        setInterval(function(){
-            if (refreshAtivo) {
-                location.reload();
-            }
-        }, 5000);
-    </script>
+        <img src="{{ url_for('static', filename=item.imagem_url) }}" width="80"><br>
+
+        <form action="{{ url_for('atualizar_produto') }}" method="POST">
+            <input type="hidden" name="id" value="{{ item.id }}">
+            <input type="hidden" name="categoria" value="bebida">
+
+            Descrição:<br>
+            <input type="text" name="descricao" value="{{ item.descricao }}"><br>
+
+            Preço:<br>
+            <input type="number" step="0.01" name="preco" value="{{ item.preco }}"><br>
+
+            <button class="salvar">Salvar</button>
+        </form>
+
+
+
+    </div>
+    {% endfor %}
+</div>
+
+</div>
+
 </body>
+</html>
