@@ -4,9 +4,6 @@
 <meta charset="UTF-8">
 <title>Painel Admin</title>
 
-<!-- 🔥 AUTO ATUALIZA -->
-<meta http-equiv="refresh" content="5">
-
 <style>
 body {
     font-family: Arial;
@@ -56,12 +53,6 @@ button {
     color: white;
 }
 
-.excluir {
-    background: #dc3545;
-    color: white;
-    margin-left: 5px;
-}
-
 .topo {
     display: flex;
     justify-content: space-between;
@@ -87,31 +78,12 @@ button {
     <a href="{{ url_for('limpar_pedidos_admin') }}">Limpar Pedidos</a>
 </div>
 
-<!-- 🔥 PEDIDOS AGORA NO TOPO -->
+<!-- 🔥 PEDIDOS (APENAS VIA JS - SEM DUPLICAÇÃO) -->
 <div class="card">
     <h2>📋 Pedidos</h2>
-
-    {% if pedidos %}
-        {% for pedido in pedidos %}
-        <div class="item">
-            <strong>Cliente:</strong> {{ pedido.cliente }}<br>
-            <strong>Mesa:</strong> {{ pedido.mesa }}<br>
-            <strong>Horário:</strong> {{ pedido.horario }}<br>
-            <strong>Status:</strong> {{ pedido.status }}<br>
-
-            <strong>Itens:</strong>
-            <ul>
-                {% for item in pedido.itens %}
-                <li>{{ item.nome }} - R$ {{ item.preco }}</li>
-                {% endfor %}
-            </ul>
-
-            <strong>Total:</strong> R$ {{ pedido.total }}
-        </div>
-        {% endfor %}
-    {% else %}
-        <p>Nenhum pedido ainda</p>
-    {% endif %}
+    <div id="lista-pedidos">
+        <p>Carregando pedidos...</p>
+    </div>
 </div>
 
 <!-- PRODUTOS -->
@@ -141,7 +113,6 @@ button {
             <button class="salvar">Salvar</button>
         </form>
 
-
     </div>
     {% endfor %}
 </div>
@@ -170,13 +141,62 @@ button {
             <button class="salvar">Salvar</button>
         </form>
 
-
-
     </div>
     {% endfor %}
 </div>
 
 </div>
+
+<!-- 🔥 SCRIPT FINAL (SEM DUPLICAÇÃO) -->
+<script>
+let ultimoTotal = -1;
+
+function carregarPedidos() {
+    fetch('/pedidos_json')
+        .then(res => res.json())
+        .then(data => {
+
+            let totalAtual = data.pedidos.length;
+
+            // só atualiza se mudou
+            if (totalAtual !== ultimoTotal) {
+
+                let html = '';
+
+                if (totalAtual === 0) {
+                    html = "<p>Nenhum pedido ainda</p>";
+                } else {
+                    data.pedidos.forEach(pedido => {
+                        html += `
+                        <div class="item">
+                            <strong>Cliente:</strong> ${pedido.cliente}<br>
+                            <strong>Mesa:</strong> ${pedido.mesa}<br>
+                            <strong>Horário:</strong> ${pedido.horario}<br>
+                            <strong>Status:</strong> ${pedido.status}<br>
+
+                            <strong>Itens:</strong>
+                            <ul>
+                                ${pedido.itens.map(i => `<li>${i.nome} - R$ ${i.preco}</li>`).join('')}
+                            </ul>
+
+                            <strong>Total:</strong> R$ ${pedido.total}
+                        </div>
+                        `;
+                    });
+                }
+
+                document.getElementById('lista-pedidos').innerHTML = html;
+                ultimoTotal = totalAtual;
+            }
+        });
+}
+
+// 🔥 atualiza sem duplicar
+setInterval(carregarPedidos, 3000);
+
+// primeira carga
+carregarPedidos();
+</script>
 
 </body>
 </html>
