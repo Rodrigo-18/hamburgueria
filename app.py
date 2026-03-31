@@ -9,34 +9,56 @@ app.secret_key = 'chave_secreta_para_o_ifood'
 # --- BANCO DE DADOS TEMPORÁRIO ---
 pedidos_geral = []
 
-# 🔥 IMAGENS DIRETO NA RAIZ DO STATIC
+# --- PRODUTOS ---
 hamburgueres = [
-    {"id": 1, "nome": "X-Burger", "preco": 15.0, "descricao": "Pão, carne e queijo",
-     "imagem_url": "imagens.jpg"},
-    {"id": 2, "nome": "X-Salada", "preco": 18.0, "descricao": "Alface, tomate e queijo",
-     "imagem_url": "xsalada.jpg"},
-    {"id": 3, "nome": "X-Bacon", "preco": 20.0, "descricao": "Com bacon crocante",
-     "imagem_url": "xbacon.jpg"},
-    {"id": 4, "nome": "X-Tudo", "preco": 25.0, "descricao": "Completo com tudo",
-     "imagem_url": "xtudo.jpg"},
+    {"id": 1, "nome": "Pastel de Carne", "preco": 8.0, "descricao": "Pastel frito de Carne", "imagem_url": "pastel_de_carne.jpg"},
+    {"id": 2, "nome": "Coxinha de Frango", "preco": 8.0, "descricao": "Coxinha frita de Frango", "imagem_url": "coxinha.jpg"},
+    {"id": 3, "nome": "Bolinha de Presunto e Queijo", "preco": 8.0, "descricao": "Salgado frito de presunto e queijo", "imagem_url": "bolinha.jpg"},
+    {"id": 4, "nome": "Bolinho de Aimpim", "preco": 8.0, "descricao": "Salgado Frito de Aimpim", "imagem_url": "bolinho_aimpim.jpg"},
+    {"id": 5, "nome": "Pão de Queijo", "preco": 8.0, "descricao": "Pão de Queijo", "imagem_url": "pao_de_queijo.jpg"},
+    {"id": 6, "nome": "Pastel de Frango", "preco": 10.0, "descricao": "Pastel Assado de Frango", "imagem_url": "pastel_frango.jpg"},
+    {"id": 7, "nome": "Hambúrguer assado", "preco": 10.0, "descricao": "Hambúrguer assado", "imagem_url": "hamburguer.jpg"},
 ]
 
 bebidas = [
-    {"id": 1, "nome": "Refrigerante", "preco": 8.0, "descricao": "Lata 350ml",
-     "imagem_url": "refri.jpg"},
-    {"id": 2, "nome": "Suco Natural", "preco": 10.0, "descricao": "Diversos sabores",
-     "imagem_url": "suco.jpg"},
+    {"id": 1, "nome": "Cerveja", "preco": 10.0, "descricao": "Long neck 330ml", "imagem_url": "bebida.jpg"},
+    {"id": 2, "nome": "Coca-Cola", "preco": 6.0, "descricao": "Original ou Zero", "imagem_url": "coca_cola.jpg"},
+    {"id": 3, "nome": "Fanta", "preco": 6.0, "descricao": "Uva, Laranja", "imagem_url": "fanta.jpg"},
+    {"id": 4, "nome": "Suco Del Valle", "preco": 6.0, "descricao": "Manga, Uva", "imagem_url": "valle.jpg"},
+    {"id": 5, "nome": "Água de Coco", "preco": 6.0, "descricao": "330ml", "imagem_url": "coco.jpg"},
+    {"id": 6, "nome": "Água", "preco": 3.0, "descricao": "Sem gás", "imagem_url": "agua.jpg"},
+    {"id": 7, "nome": "Água com Gás", "preco": 4.0, "descricao": "Com gás", "imagem_url": "agua_gas.jpg"},
+    {"id": 8, "nome": "Toddynho", "preco": 4.0, "descricao": "200ml", "imagem_url": "toddynho.jpg"},
+    {"id": 9, "nome": "Red Bull", "preco": 12.0, "descricao": "250ml", "imagem_url": "bull.jpg"},
 ]
 
+doces = [
+    {"id": 1, "nome": "Talento", "preco": 12.0, "descricao": "Chocolate 85g", "imagem_url": "talento.jpg"},
+    {"id": 2, "nome": "Palha Italiana", "preco": 6.0, "descricao": "", "imagem_url": "palha.jpg"},
+    {"id": 3, "nome": "Cocada", "preco": 6.0, "descricao": "", "imagem_url": "cocada.jpg"},
+    {"id": 4, "nome": "Amendoim Doce", "preco": 6.0, "descricao": "", "imagem_url": "amendoim.jpg"},
+    {"id": 5, "nome": "Snickers", "preco": 6.0, "descricao": "", "imagem_url": "snickers.jpg"},
+    {"id": 6, "nome": "Doces Diversos", "preco": 3.0, "descricao": "Mentos, Trident e Halls", "imagem_url": "bala.jpg"},
+]
+
+# 🔥 CATEGORIAS CENTRALIZADAS
+categorias = {
+    "hamburguer": hamburgueres,
+    "bebida": bebidas,
+    "doce": doces
+}
+
+# --- ROTAS ---
 
 @app.route('/')
 def index():
-    itens_carrinho = session.get('carrinho', [])
-    return render_template('index.html',
-                           hamburgueres=hamburgueres,
-                           bebidas=bebidas,
-                           carrinho=itens_carrinho)
-
+    return render_template(
+        'index.html',
+        hamburgueres=hamburgueres,
+        bebidas=bebidas,
+        doces=doces,
+        carrinho=session.get('carrinho', [])
+    )
 
 @app.route('/adicionar', methods=['POST'])
 def adicionar_carrinho():
@@ -49,81 +71,71 @@ def adicionar_carrinho():
         'observacao': request.form.get('observacao')
     }
 
-    lista = session['carrinho']
-    lista.append(item)
-    session['carrinho'] = lista
+    session['carrinho'].append(item)
     session.modified = True
 
     return redirect(url_for('index'))
 
-
 @app.route('/carrinho')
 def mostrar_carrinho():
-    itens = session.get('carrinho', [])
-    return render_template('pedido.html', carrinho=itens)
-
+    return render_template('pedido.html', carrinho=session.get('carrinho', []))
 
 @app.route('/limpar')
 def limpar_carrinho():
     session.pop('carrinho', None)
     return redirect(url_for('index'))
 
-
 @app.route('/confirmar', methods=['POST'])
 def confirmar_pedido():
-    nome = request.form.get('cliente_nome')
-    mesa = request.form.get('mesa')
     itens = session.get('carrinho', [])
 
-    # 🔥 BLOQUEIA DUPLICAÇÃO
     if not itens:
         return redirect(url_for('index'))
 
-    horario_agora = datetime.now().strftime('%d/%m/%Y %H:%M')
+    nome = request.form.get('cliente_nome')
+    mesa = request.form.get('mesa')
 
-    total_pedido = sum(float(item['preco']) for item in itens)
+    horario = datetime.now().strftime('%d/%m/%Y %H:%M')
+    total = sum(float(item['preco']) for item in itens)
 
-    novo_pedido = {
+    pedidos_geral.append({
         "cliente": nome,
         "mesa": mesa,
         "itens": itens,
-        "total": total_pedido,
-        "horario": horario_agora,
+        "total": total,
+        "horario": horario,
         "status": "Pendente"
-    }
+    })
 
-    pedidos_geral.append(novo_pedido)
-
-    # 🔥 LIMPA CARRINHO
     session.pop('carrinho', None)
 
-    # 🔥 SALVA CONFIRMAÇÃO
     session['ultimo_pedido'] = {
         "nome": nome,
         "mesa": mesa,
-        "horario": horario_agora
+        "horario": horario
     }
 
-    # 🔥 REDIRECT (anti-duplicação)
     return redirect(url_for('pedido_confirmado'))
 
+@app.route('/pedido_confirmado')
+def pedido_confirmado():
+    pedido = session.get('ultimo_pedido', {})
+    return render_template('pedido_confirmado.html',
+                           nome=pedido.get('nome'),
+                           mesa=pedido.get('mesa'),
+                           horario=pedido.get('horario'))
 
-# --- LOGIN ADMIN ---
+# --- ADMIN ---
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        usuario = request.form.get('usuario')
-        senha = request.form.get('senha')
-
-        if usuario == 'restaurante' and senha == '*1234*':
+        if request.form.get('usuario') == 'restaurante' and request.form.get('senha') == '*1234*':
             session['admin_logado'] = True
             return redirect(url_for('admin_painel'))
-        else:
-            return "Acesso negado!", 403
+        return "Acesso negado!", 403
 
     return render_template('login.html')
-
 
 @app.route('/admin')
 def admin_painel():
@@ -133,91 +145,70 @@ def admin_painel():
     return render_template('admin.html',
                            pedidos=pedidos_geral,
                            hamburgueres=hamburgueres,
-                           bebidas=bebidas)
-
+                           bebidas=bebidas,
+                           doces=doces)
 
 @app.route('/admin/limpar')
 def limpar_pedidos_admin():
     pedidos_geral.clear()
     return redirect(url_for('admin_painel'))
 
-
 @app.route('/admin/atualizar_produto', methods=['POST'])
 def atualizar_produto():
-    if not session.get('admin_logado'):
-        return redirect(url_for('login'))
-
-    id_p = int(request.form.get('id'))
-    nova_desc = request.form.get('descricao')
-    novo_preco = float(request.form.get('preco'))
     cat = request.form.get('categoria')
-
-    lista = hamburgueres if cat == 'hamburguer' else bebidas
+    lista = categorias.get(cat, [])
 
     for item in lista:
-        if item['id'] == id_p:
-            item['descricao'] = nova_desc
-            item['preco'] = novo_preco
+        if item['id'] == int(request.form.get('id')):
+            item['descricao'] = request.form.get('descricao')
+            item['preco'] = float(request.form.get('preco'))
             break
 
     return redirect(url_for('admin_painel'))
 
-
-# 🔥 UPLOAD AJUSTADO PARA /static DIRETO
-@app.route('/adicionar_produto', methods=['POST'])
-def adicionar_produto():
-    nome = request.form.get('nome')
-    descricao = request.form.get('descricao')
-    preco = request.form.get('preco')
-    imagem = request.files['imagem']
-
-    nome_arquivo = secure_filename(imagem.filename)
-
-    caminho = os.path.join('static', nome_arquivo)
-    imagem.save(caminho)
-
-    novo_produto = {
-        "id": len(hamburgueres) + 1,
-        "nome": nome,
-        "descricao": descricao,
-        "preco": float(preco),
-        "imagem_url": nome_arquivo  # 🔥 AGORA CORRETO
-    }
-
-    hamburgueres.append(novo_produto)
-
-    return redirect(url_for('admin_painel'))
 @app.route('/excluir_produto', methods=['POST'])
 def excluir_produto():
-    if not session.get('admin_logado'):
-        return redirect(url_for('login'))
-
-    id_p = int(request.form.get('id'))
     cat = request.form.get('categoria')
-
-    lista = hamburgueres if cat == 'hamburguer' else bebidas
+    lista = categorias.get(cat, [])
 
     for item in lista:
-        if item['id'] == id_p:
+        if item['id'] == int(request.form.get('id')):
             lista.remove(item)
             break
 
     return redirect(url_for('admin_painel'))
+
+@app.route('/adicionar_produto', methods=['POST'])
+def adicionar_produto():
+    categoria = request.form.get('categoria')
+    lista = categorias.get(categoria, [])
+
+    imagem = request.files['imagem']
+    nome_arquivo = secure_filename(imagem.filename)
+    imagem.save(os.path.join('static', nome_arquivo))
+
+    lista.append({
+        "id": len(lista) + 1,
+        "nome": request.form.get('nome'),
+        "descricao": request.form.get('descricao'),
+        "preco": float(request.form.get('preco')),
+        "imagem_url": nome_arquivo
+    })
+
+    return redirect(url_for('admin_painel'))
+
+# --- API ---
+
 @app.route('/pedidos_json')
 def pedidos_json():
     return {"pedidos": pedidos_geral}
 
-@app.route('/pedido_confirmado')
-def pedido_confirmado():
-    pedido = session.get('ultimo_pedido', {})
+@app.route('/atender/<int:index>')
+def atender_pedido(index):
+    if 0 <= index < len(pedidos_geral):
+        pedidos_geral[index]['status'] = 'Atendido'
+    return '', 204
 
-    return render_template(
-        'pedido_confirmado.html',
-        nome=pedido.get('nome'),
-        mesa=pedido.get('mesa'),
-        horario=pedido.get('horario')
-    )
-
-
+# --- RUN ---
 if __name__ == '__main__':
     app.run(debug=True)

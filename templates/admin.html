@@ -166,7 +166,7 @@ function carregarPedidos() {
                 if (totalAtual === 0) {
                     html = "<p>Nenhum pedido ainda</p>";
                 } else {
-                    data.pedidos.forEach(pedido => {
+                    data.pedidos.forEach((pedido, index) => {
                         html += `
                         <div class="item">
                             <strong>Cliente:</strong> ${pedido.cliente}<br>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Mini iFood</title>
+    <title>Lanchonete Do Marcony</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -9,13 +9,13 @@
         Acesso Restrito (Administração)
     </a>
 
-    <h1>🍔 Restaurante</h1>
+    <h1>🍔 Lanchonete</h1>
 
 
     </a>
 </footer>
 
-<h2>Hambúrgueres</h2>
+<h2>Salgados Fritos e Assados</h2>
 <div class="cardapio-container">
     {% for item in hamburgueres %}
     <div class="item-card">
@@ -42,7 +42,30 @@
     {% for item in bebidas %}
     <div class="item-card">
         {% if item.imagem_url %}
-        <img src="{{ item.imagem_url }}" alt="{{ item.nome }}">
+        <img src="{{ url_for('static', filename=item.imagem_url) }}">
+        {% endif %}
+        <h3>{{ item.nome }}</h3>
+        <p>{{ item.descricao }}</p>
+        <p>R$ {{ "%.2f"|format(item.preco|float) }}</p>
+
+        <!-- Formulário para adicionar ao carrinho -->
+        <form action="{{ url_for('adicionar_carrinho') }}" method="POST">
+            <input type="hidden" name="nome" value="{{ item.nome }}">
+            <input type="hidden" name="preco" value="{{ item.preco }}">
+            <textarea name="observacao" placeholder="Observação (opcional)"></textarea><br>
+            <button type="submit" class="botao-adicionar">Adicionar ao Carrinho</button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+
+
+    <h2>Doces</h2>
+<div class="cardapio-container">
+    {% for item in doces %}
+    <div class="item-card">
+        {% if item.imagem_url %}
+        <img src="{{ url_for('static', filename=item.imagem_url) }}">
         {% endif %}
         <h3>{{ item.nome }}</h3>
         <p>{{ item.descricao }}</p>
