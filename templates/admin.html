@@ -155,7 +155,7 @@ function carregarPedidos() {
     fetch('/pedidos_json')
         .then(res => res.json())
         .then(data => {
-            // Criamos uma assinatura única dos dados para detectar mudanças reais
+
             let comparador = data.pedidos.length + data.pedidos.map(p => p.status).join('');
 
             if (comparador !== ultimoTotal) {
@@ -166,7 +166,7 @@ function carregarPedidos() {
 
                 data.pedidos.forEach((pedido) => {
                 console.log("Pedido ID:", pedido.id, "Status atual:", pedido.status);
-                    // Monta o HTML do item
+
                     let itensHtml = pedido.itens.map(i => `<li>${i.nome} - R$ ${i.preco}</li>`).join('');
 
                     let bloco = `
@@ -177,7 +177,7 @@ function carregarPedidos() {
                             <strong>Total:</strong> R$ ${pedido.total}<br>
                     `;
 
-                    // SEPARAÇÃO LÓGICA
+
                     if (pedido.status === 'pendente') {
                         bloco += `<button style="background: #28a745; color: white; margin: 10px 0; border:none; padding:8px; border-radius:5px; cursor:pointer;"
                                   onclick="atenderPedido(${pedido.id})">Marcar como Atendido</button>`;
@@ -201,16 +201,17 @@ function carregarPedidos() {
 }
 
 function atenderPedido(id) {
-    // Faz o POST para o servidor atualizar o banco
+
+
     fetch(`/atender_pedido/${id}`, { method: 'POST' })
         .then(() => {
-            // Após o servidor processar, força a atualização visual
+
             ultimoTotal = -1;
             carregarPedidos();
         });
 }
 
-// Atualiza a cada 3 segundos
+
 setInterval(carregarPedidos, 3000);
 carregarPedidos();
 </script>

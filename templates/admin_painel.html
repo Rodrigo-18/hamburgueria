@@ -3,7 +3,7 @@ def admin_painel():
     if not session.get('admin_logado'):
         return redirect(url_for('login'))
 
-    # Agora passamos os produtos para o HTML poder criar os campos de edição
+
     return render_template('admin.html',
                            pedidos=pedidos_geral,
                            hamburgueres=hamburgueres,

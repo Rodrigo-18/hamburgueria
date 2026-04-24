@@ -6,7 +6,7 @@
     <style>
         body { font-family: Arial; text-align: center; padding-top: 50px; background-color: #fff8f0; }
         .box { background: white; padding: 20px; display: inline-block; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .horario { color: #666; font-style: italic; margin-top: 10px; }
+        .horario { color: #566; font-style: italic; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -15,7 +15,7 @@
         <p>Obrigado, <strong>{{ nome }}</strong>!</p>
         <p>Seu pedido para a <strong>Mesa {{ mesa }}</strong> foi enviado.</p>
 
-        <p class="horario">Realizado em: {{ horario }}</p>
+<!--        <p class="horario">Realizado em: {{ horario }}</p>-->
 
         <hr>
         <a href="{{ url_for('index') }}" style="text-decoration: none; color: #ff4500; font-weight: bold;">← Voltar ao Cardápio</a>

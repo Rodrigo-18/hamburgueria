@@ -66,22 +66,35 @@ def limpar_carrinho():
     session.pop('carrinho', None)
     return redirect(url_for('index'))
 
+
 @app.route('/confirmar', methods=['POST'])
 def confirmar_pedido():
     itens = session.get('carrinho', [])
     if not itens: return redirect(url_for('index'))
 
+    # Captura o horário
+    agora = datetime.now().strftime('%d/%m/%Y às %H:%M')
+    nome = request.form.get('cliente_nome')
+    mesa = request.form.get('mesa')
+
     pedidos_geral.append({
         "id": len(pedidos_geral) + 1,
-        "cliente": request.form.get('cliente_nome'),
-        "mesa": request.form.get('mesa'),
+        "cliente": nome,
+        "mesa": mesa,
         "itens": itens,
         "total": sum(float(item['preco']) for item in itens),
-        "horario": datetime.now().strftime('%d/%m/%Y %H:%M'),
+        "horario": agora,  # Horário salvo no sistema
         "status": "pendente"
     })
+
     session.pop('carrinho', None)
-    session['ultimo_pedido'] = {"nome": request.form.get('cliente_nome'), "mesa": request.form.get('mesa')}
+    # Salva o horário também na sessão para exibir na confirmação
+    session['ultimo_pedido'] = {
+        "nome": nome,
+        "mesa": mesa,
+        "horario": agora
+    }
+
     return redirect(url_for('pedido_confirmado'))
 
 @app.route('/pedido_confirmado')
@@ -134,14 +147,14 @@ def atender_pedido(pedido_id):
 
 @app.route('/admin/relatorio_diario')
 def relatorio_diario():
-    # Corrigido: deve ser 'admin_logado' igual ao admin_painel
+
     if not session.get('admin_logado'):
         return redirect(url_for('login'))
 
-    # Filtra apenas os atendidos
+
     atendidos = [p for p in pedidos_geral if p['status'] == 'atendido']
 
-    # Calcula o total de todos os atendidos
+
     total_diario = sum(float(p['total']) for p in atendidos)
 
     return render_template('relatorio.html', atendidos=atendidos, total=total_diario)

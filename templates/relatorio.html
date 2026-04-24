@@ -23,6 +23,16 @@
         Valor Total do Dia: R$ {{ "%.2f"|format(total if total else 0.0) }}
     </div>
 
+    <div class="topo">
+    <a href="{{ url_for('index') }}">Ver Cardápio</a>
+    <a href="{{ url_for('relatorio_diario') }}">Ver Relatório Diário</a>
+    <a href="{{ url_for('limpar_pedidos_admin') }}">Limpar Pedidos</a>
+
+    <button onclick="window.print()" style="background: #007bff; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">
+        🖨️ Imprimir Pedidos
+    </button>
+</div>
+
     <hr>
 
     {% for p in atendidos %}
