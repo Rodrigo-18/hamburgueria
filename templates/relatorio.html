@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório Diário</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .pedido-card { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
+        .total-geral { font-size: 20px; font-weight: bold; color: #28a745; margin-top: 20px; }
+
+        @media print {
+            a { display: none; } /* Oculta o link ao imprimir */
+            body { background: white; }
+            .pedido-card { page-break-inside: avoid; border: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body>
+    <h1>📊 Relatório de Atendidos</h1>
+    <a href="{{ url_for('admin_painel') }}">Voltar ao Painel</a>
+
+    <div class="total-geral">
+        Valor Total do Dia: R$ {{ "%.2f"|format(total if total else 0.0) }}
+    </div>
+
+    <hr>
+
+    {% for p in atendidos %}
+    <div class="pedido-card">
+        <strong>Cliente:</strong> {{ p.cliente }} | <strong>Mesa:</strong> {{ p.mesa }} | <strong>Total:</strong> R$ {{ p.total }}<br>
+        <ul>
+            {% for item in p.itens %}
+                <li>{{ item.nome }} - R$ {{ item.preco }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+</body>
+</html>

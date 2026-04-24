@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Painel Admin</title>
+<title>Controle Dos Pedidos</title>
 
 <style>
 body {
@@ -75,6 +75,7 @@ button {
 
 <div class="topo">
     <a href="{{ url_for('index') }}">Ver Cardápio</a>
+    <a href="{{ url_for('relatorio_diario') }}">Ver Relatório Diário</a>
     <a href="{{ url_for('limpar_pedidos_admin') }}">Limpar Pedidos</a>
 </div>
 
@@ -147,7 +148,6 @@ button {
 
 </div>
 
-<!-- 🔥 SCRIPT FINAL (SEM DUPLICAÇÃO) -->
 <script>
 let ultimoTotal = -1;
 
@@ -155,48 +155,62 @@ function carregarPedidos() {
     fetch('/pedidos_json')
         .then(res => res.json())
         .then(data => {
+            // Criamos uma assinatura única dos dados para detectar mudanças reais
+            let comparador = data.pedidos.length + data.pedidos.map(p => p.status).join('');
 
-            let totalAtual = data.pedidos.length;
+            if (comparador !== ultimoTotal) {
+                let htmlPendentes = '<h3>📋 Pedidos Pendentes</h3>';
+                let htmlAtendidos = '<h3>✅ Pedidos Atendidos</h3>';
+                let temPendente = false;
+                let temAtendido = false;
 
-            // só atualiza se mudou
-            if (totalAtual !== ultimoTotal) {
+                data.pedidos.forEach((pedido) => {
+                console.log("Pedido ID:", pedido.id, "Status atual:", pedido.status);
+                    // Monta o HTML do item
+                    let itensHtml = pedido.itens.map(i => `<li>${i.nome} - R$ ${i.preco}</li>`).join('');
 
-                let html = '';
-
-                if (totalAtual === 0) {
-                    html = "<p>Nenhum pedido ainda</p>";
-                } else {
-                    data.pedidos.forEach((pedido, index) => {
-                        html += `
-                        <div class="item">
+                    let bloco = `
+                        <div class="item" style="margin-bottom: 15px; border-bottom: 1px solid #eee;">
                             <strong>Cliente:</strong> ${pedido.cliente}<br>
                             <strong>Mesa:</strong> ${pedido.mesa}<br>
-                            <strong>Horário:</strong> ${pedido.horario}<br>
-                            <strong>Status:</strong> ${pedido.status}<br>
+                            <strong>Itens:</strong> <ul>${itensHtml}</ul>
+                            <strong>Total:</strong> R$ ${pedido.total}<br>
+                    `;
 
-                            <strong>Itens:</strong>
-                            <ul>
-                                ${pedido.itens.map(i => `<li>${i.nome} - R$ ${i.preco}</li>`).join('')}
-                            </ul>
+                    // SEPARAÇÃO LÓGICA
+                    if (pedido.status === 'pendente') {
+                        bloco += `<button style="background: #28a745; color: white; margin: 10px 0; border:none; padding:8px; border-radius:5px; cursor:pointer;"
+                                  onclick="atenderPedido(${pedido.id})">Marcar como Atendido</button>`;
+                        htmlPendentes += bloco + "</div>";
+                        temPendente = true;
+                    } else {
+                        bloco += `<p style="color: #666; font-style: italic;">Status: Atendido</p></div>`;
+                        htmlAtendidos += bloco + "</div>";
+                        temAtendido = true;
+                    }
+                });
 
-                            <strong>Total:</strong> R$ ${pedido.total}
-                        </div>
-                        `;
-                    });
-                }
+                document.getElementById('lista-pedidos').innerHTML =
+                    (temPendente ? htmlPendentes : "<h3>📋 Pedidos Pendentes</h3><p>Nenhum pedido pendente.</p>") +
+                    "<hr style='margin: 20px 0;'>" +
+                    (temAtendido ? htmlAtendidos : "<h3>✅ Pedidos Atendidos</h3><p>Nenhum pedido atendido.</p>");
 
-                document.getElementById('lista-pedidos').innerHTML = html;
-                ultimoTotal = totalAtual;
+                ultimoTotal = comparador;
             }
         });
 }
 
-// 🔥 atualiza sem duplicar
-setInterval(carregarPedidos, 3000);
+function atenderPedido(id) {
+    // Faz o POST para o servidor atualizar o banco
+    fetch(`/atender_pedido/${id}`, { method: 'POST' })
+        .then(() => {
+            // Após o servidor processar, força a atualização visual
+            ultimoTotal = -1;
+            carregarPedidos();
+        });
+}
 
-// primeira carga
+// Atualiza a cada 3 segundos
+setInterval(carregarPedidos, 3000);
 carregarPedidos();
 </script>
-
-</body>
-</html>

@@ -41,39 +41,20 @@ doces = [
     {"id": 6, "nome": "Doces Diversos", "preco": 3.0, "descricao": "Mentos, Trident e Halls", "imagem_url": "bala.jpg"},
 ]
 
-# 🔥 CATEGORIAS CENTRALIZADAS
-categorias = {
-    "hamburguer": hamburgueres,
-    "bebida": bebidas,
-    "doce": doces
-}
+categorias = {"hamburguer": hamburgueres, "bebida": bebidas, "doce": doces}
 
 # --- ROTAS ---
 
 @app.route('/')
 def index():
-    return render_template(
-        'index.html',
-        hamburgueres=hamburgueres,
-        bebidas=bebidas,
-        doces=doces,
-        carrinho=session.get('carrinho', [])
-    )
+    return render_template('index.html', hamburgueres=hamburgueres, bebidas=bebidas, doces=doces, carrinho=session.get('carrinho', []))
 
 @app.route('/adicionar', methods=['POST'])
 def adicionar_carrinho():
-    if 'carrinho' not in session:
-        session['carrinho'] = []
-
-    item = {
-        'nome': request.form.get('nome'),
-        'preco': request.form.get('preco'),
-        'observacao': request.form.get('observacao')
-    }
-
+    if 'carrinho' not in session: session['carrinho'] = []
+    item = {'nome': request.form.get('nome'), 'preco': request.form.get('preco'), 'observacao': request.form.get('observacao')}
     session['carrinho'].append(item)
     session.modified = True
-
     return redirect(url_for('index'))
 
 @app.route('/carrinho')
@@ -88,42 +69,24 @@ def limpar_carrinho():
 @app.route('/confirmar', methods=['POST'])
 def confirmar_pedido():
     itens = session.get('carrinho', [])
-
-    if not itens:
-        return redirect(url_for('index'))
-
-    nome = request.form.get('cliente_nome')
-    mesa = request.form.get('mesa')
-
-    horario = datetime.now().strftime('%d/%m/%Y %H:%M')
-    total = sum(float(item['preco']) for item in itens)
+    if not itens: return redirect(url_for('index'))
 
     pedidos_geral.append({
-        "cliente": nome,
-        "mesa": mesa,
+        "id": len(pedidos_geral) + 1,
+        "cliente": request.form.get('cliente_nome'),
+        "mesa": request.form.get('mesa'),
         "itens": itens,
-        "total": total,
-        "horario": horario,
-        "status": "Pendente"
+        "total": sum(float(item['preco']) for item in itens),
+        "horario": datetime.now().strftime('%d/%m/%Y %H:%M'),
+        "status": "pendente"
     })
-
     session.pop('carrinho', None)
-
-    session['ultimo_pedido'] = {
-        "nome": nome,
-        "mesa": mesa,
-        "horario": horario
-    }
-
+    session['ultimo_pedido'] = {"nome": request.form.get('cliente_nome'), "mesa": request.form.get('mesa')}
     return redirect(url_for('pedido_confirmado'))
 
 @app.route('/pedido_confirmado')
 def pedido_confirmado():
-    pedido = session.get('ultimo_pedido', {})
-    return render_template('pedido_confirmado.html',
-                           nome=pedido.get('nome'),
-                           mesa=pedido.get('mesa'),
-                           horario=pedido.get('horario'))
+    return render_template('pedido_confirmado.html')
 
 # --- ADMIN ---
 
@@ -133,20 +96,12 @@ def login():
         if request.form.get('usuario') == 'restaurante' and request.form.get('senha') == '*1234*':
             session['admin_logado'] = True
             return redirect(url_for('admin_painel'))
-        return "Acesso negado!", 403
-
     return render_template('login.html')
 
 @app.route('/admin')
 def admin_painel():
-    if not session.get('admin_logado'):
-        return redirect(url_for('login'))
-
-    return render_template('admin.html',
-                           pedidos=pedidos_geral,
-                           hamburgueres=hamburgueres,
-                           bebidas=bebidas,
-                           doces=doces)
+    if not session.get('admin_logado'): return redirect(url_for('login'))
+    return render_template('admin.html', pedidos=pedidos_geral, hamburgueres=hamburgueres, bebidas=bebidas, doces=doces)
 
 @app.route('/admin/limpar')
 def limpar_pedidos_admin():
@@ -156,45 +111,10 @@ def limpar_pedidos_admin():
 @app.route('/admin/atualizar_produto', methods=['POST'])
 def atualizar_produto():
     cat = request.form.get('categoria')
-    lista = categorias.get(cat, [])
-
-    for item in lista:
+    for item in categorias.get(cat, []):
         if item['id'] == int(request.form.get('id')):
             item['descricao'] = request.form.get('descricao')
             item['preco'] = float(request.form.get('preco'))
-            break
-
-    return redirect(url_for('admin_painel'))
-
-@app.route('/excluir_produto', methods=['POST'])
-def excluir_produto():
-    cat = request.form.get('categoria')
-    lista = categorias.get(cat, [])
-
-    for item in lista:
-        if item['id'] == int(request.form.get('id')):
-            lista.remove(item)
-            break
-
-    return redirect(url_for('admin_painel'))
-
-@app.route('/adicionar_produto', methods=['POST'])
-def adicionar_produto():
-    categoria = request.form.get('categoria')
-    lista = categorias.get(categoria, [])
-
-    imagem = request.files['imagem']
-    nome_arquivo = secure_filename(imagem.filename)
-    imagem.save(os.path.join('static', nome_arquivo))
-
-    lista.append({
-        "id": len(lista) + 1,
-        "nome": request.form.get('nome'),
-        "descricao": request.form.get('descricao'),
-        "preco": float(request.form.get('preco')),
-        "imagem_url": nome_arquivo
-    })
-
     return redirect(url_for('admin_painel'))
 
 # --- API ---
@@ -203,12 +123,29 @@ def adicionar_produto():
 def pedidos_json():
     return {"pedidos": pedidos_geral}
 
-@app.route('/atender/<int:index>')
-def atender_pedido(index):
-    if 0 <= index < len(pedidos_geral):
-        pedidos_geral[index]['status'] = 'Atendido'
+@app.route('/atender_pedido/<int:pedido_id>', methods=['POST'])
+def atender_pedido(pedido_id):
+    for pedido in pedidos_geral:
+        if pedido['id'] == pedido_id:
+            pedido['status'] = 'atendido'
+            break
     return '', 204
 
-# --- RUN ---
+
+@app.route('/admin/relatorio_diario')
+def relatorio_diario():
+    # Corrigido: deve ser 'admin_logado' igual ao admin_painel
+    if not session.get('admin_logado'):
+        return redirect(url_for('login'))
+
+    # Filtra apenas os atendidos
+    atendidos = [p for p in pedidos_geral if p['status'] == 'atendido']
+
+    # Calcula o total de todos os atendidos
+    total_diario = sum(float(p['total']) for p in atendidos)
+
+    return render_template('relatorio.html', atendidos=atendidos, total=total_diario)
+
+
 if __name__ == '__main__':
     app.run(debug=True)
