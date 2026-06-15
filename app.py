@@ -106,7 +106,7 @@ def pedido_confirmado():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        if request.form.get('usuario') == 'restaurante' and request.form.get('senha') == '*1234*':
+        if request.form.get('usuario') == 'restaurante' and request.form.get('senha') == 'restaurante':
             session['admin_logado'] = True
             return redirect(url_for('admin_painel'))
     return render_template('login.html')
