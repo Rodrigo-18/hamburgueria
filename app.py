@@ -6,10 +6,10 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.secret_key = 'chave_secreta_para_o_ifood'
 
-# --- BANCO DE DADOS TEMPORÁRIO ---
+
 pedidos_geral = []
 
-# --- PRODUTOS ---
+
 hamburgueres = [
     {"id": 1, "nome": "Pastel de Carne", "preco": 8.0, "descricao": "Pastel frito de Carne", "imagem_url": "pastel_de_carne.jpg"},
     {"id": 2, "nome": "Coxinha de Frango", "preco": 8.0, "descricao": "Coxinha frita de Frango", "imagem_url": "coxinha.jpg"},
@@ -43,7 +43,6 @@ doces = [
 
 categorias = {"hamburguer": hamburgueres, "bebida": bebidas, "doce": doces}
 
-# --- ROTAS ---
 
 @app.route('/')
 def index():
@@ -72,7 +71,7 @@ def confirmar_pedido():
     itens = session.get('carrinho', [])
     if not itens: return redirect(url_for('index'))
 
-    # Captura o horário
+
     agora = datetime.now().strftime('%d/%m/%Y às %H:%M')
     nome = request.form.get('cliente_nome')
     mesa = request.form.get('mesa')
@@ -88,7 +87,7 @@ def confirmar_pedido():
     })
 
     session.pop('carrinho', None)
-    # Salva o horário também na sessão para exibir na confirmação
+ 
     session['ultimo_pedido'] = {
         "nome": nome,
         "mesa": mesa,
@@ -101,7 +100,7 @@ def confirmar_pedido():
 def pedido_confirmado():
     return render_template('pedido_confirmado.html')
 
-# --- ADMIN ---
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -130,7 +129,7 @@ def atualizar_produto():
             item['preco'] = float(request.form.get('preco'))
     return redirect(url_for('admin_painel'))
 
-# --- API ---
+
 
 @app.route('/pedidos_json')
 def pedidos_json():
