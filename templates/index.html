@@ -26,7 +26,7 @@
         <p>{{ item.descricao }}</p>
         <p>R$ {{ "%.2f"|format(item.preco|float) }}</p>
 
-        <!-- Formulário para adicionar ao carrinho -->
+    
         <form action="{{ url_for('adicionar_carrinho') }}" method="POST">
             <input type="hidden" name="nome" value="{{ item.nome }}">
             <input type="hidden" name="preco" value="{{ item.preco }}">
@@ -48,7 +48,7 @@
         <p>{{ item.descricao }}</p>
         <p>R$ {{ "%.2f"|format(item.preco|float) }}</p>
 
-        <!-- Formulário para adicionar ao carrinho -->
+      
         <form action="{{ url_for('adicionar_carrinho') }}" method="POST">
             <input type="hidden" name="nome" value="{{ item.nome }}">
             <input type="hidden" name="preco" value="{{ item.preco }}">
@@ -71,7 +71,7 @@
         <p>{{ item.descricao }}</p>
         <p>R$ {{ "%.2f"|format(item.preco|float) }}</p>
 
-        <!-- Formulário para adicionar ao carrinho -->
+       
         <form action="{{ url_for('adicionar_carrinho') }}" method="POST">
             <input type="hidden" name="nome" value="{{ item.nome }}">
             <input type="hidden" name="preco" value="{{ item.preco }}">
